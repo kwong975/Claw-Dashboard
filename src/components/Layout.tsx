@@ -1,9 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings } from "lucide-react";
+import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings, ListChecks } from "lucide-react";
 
 const nav = [
   { label: "Command",    to: "/",          icon: Terminal },
+  { label: "Resolution", to: "/command/resolution", icon: ListChecks },
   { label: "Floor",      to: "/floor",     icon: LayoutGrid },
   { label: "Ops",        to: "/ops",       icon: Columns3 },
   { label: "Incidents",  to: "/incidents", icon: AlertTriangle },

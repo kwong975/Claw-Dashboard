@@ -11,6 +11,7 @@ import Incidents from "./pages/Incidents";
 import Schedule from "./pages/Schedule";
 import Timeline from "./pages/Timeline";
 import Watchtower from "./pages/Watchtower";
+import ResolutionBoard from "./pages/ResolutionBoard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Command />} />
+            <Route path="/command/resolution" element={<ResolutionBoard />} />
             <Route path="/floor" element={<Floor />} />
             <Route path="/ops" element={<Ops />} />
             <Route path="/incidents" element={<Incidents />} />
