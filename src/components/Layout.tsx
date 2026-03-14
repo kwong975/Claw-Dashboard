@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings } from "lucide-react";
+import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings, ListChecks } from "lucide-react";
 
 const nav = [
   { label: "Command",    to: "/",          icon: Terminal },
