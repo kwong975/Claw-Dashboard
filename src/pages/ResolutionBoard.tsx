@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import {
   AlertCircle, Clock, Users, Ban, CheckCircle2, Search,
   ArrowUpDown, ChevronRight, X, FileText, Mail, MessageSquare,
-  CalendarDays, User,
+  CalendarDays, User, ArrowUpRight, CircleDot, Zap, GitBranch,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
@@ -38,6 +38,12 @@ interface Artifact {
   date: string;
 }
 
+interface LifecycleEvent {
+  action: string;
+  actor: string;
+  timestamp: string;
+}
+
 interface Issue {
   id: string;
   title: string;
@@ -51,6 +57,8 @@ interface Issue {
   commitments: Commitment[];
   threads: Thread[];
   artifacts: Artifact[];
+  lastActivity: string;
+  lifecycle: LifecycleEvent[];
 }
 
 /* ── Mock Data ─────────────────────────────────────────── */
@@ -59,6 +67,7 @@ const issues: Issue[] = [
   {
     id: "iss-001", title: "Compliance Policies", state: "active", type: "compliance",
     severity: "critical", priority_score: 0.92, recommended_move: "escalate",
+    lastActivity: "2h ago",
     reasoning: ["3 overdue commitments", "Regulatory deadline approaching", "Multiple stakeholders blocked"],
     participants: ["Raymond", "ChrisLiu", "Sarah"],
     commitments: [
@@ -75,10 +84,16 @@ const issues: Issue[] = [
       { type: "meeting_note", title: "Compliance standup Mar 12", date: "Mar 12" },
       { type: "email", title: "Regulatory update from legal", date: "Mar 11" },
     ],
+    lifecycle: [
+      { action: "Escalation recommended", actor: "System", timestamp: "2h ago" },
+      { action: "Commitment overdue: Review audit findings", actor: "ChrisLiu", timestamp: "6d ago" },
+      { action: "Issue created from thread", actor: "System", timestamp: "12d ago" },
+    ],
   },
   {
     id: "iss-002", title: "Budget Review Q2", state: "waiting_on_me", type: "budget",
     severity: "high", priority_score: 0.80, recommended_move: "decide",
+    lastActivity: "4h ago",
     reasoning: ["Approval pending your decision", "Finance team waiting", "Board meeting in 5 days"],
     participants: ["Raymond", "Finance Team"],
     commitments: [
@@ -90,10 +105,16 @@ const issues: Issue[] = [
       { type: "document", title: "Q2 Budget Spreadsheet", date: "Mar 12" },
       { type: "email", title: "Budget approval request", date: "Mar 11" },
     ],
+    lifecycle: [
+      { action: "Decision required — budget approval", actor: "System", timestamp: "4h ago" },
+      { action: "Finance numbers finalized", actor: "Finance Team", timestamp: "2d ago" },
+      { action: "Issue created", actor: "Raymond", timestamp: "8d ago" },
+    ],
   },
   {
     id: "iss-003", title: "Tencent Audit Preparation", state: "active", type: "compliance",
     severity: "high", priority_score: 0.78, recommended_move: "follow_up",
+    lastActivity: "6h ago",
     reasoning: ["Audit date confirmed", "2 open items remaining", "Need sign-off from Raymond"],
     participants: ["Raymond", "AuditTeam", "External"],
     commitments: [
@@ -102,10 +123,16 @@ const issues: Issue[] = [
     ],
     threads: [{ title: "Tencent audit — prep checklist", lastActivity: "6h ago" }],
     artifacts: [{ type: "meeting_note", title: "Audit prep call Mar 11", date: "Mar 11" }],
+    lifecycle: [
+      { action: "Follow-up recommended", actor: "System", timestamp: "6h ago" },
+      { action: "Audit date confirmed", actor: "External", timestamp: "3d ago" },
+      { action: "Issue created", actor: "AuditTeam", timestamp: "10d ago" },
+    ],
   },
   {
     id: "iss-004", title: "Platform Migration Blocked", state: "blocked", type: "delivery",
     severity: "high", priority_score: 0.75, recommended_move: "escalate",
+    lastActivity: "3d ago",
     reasoning: ["Dependency on infrastructure team", "No response in 3 days", "Downstream deliverables at risk"],
     participants: ["DevOps", "InfraTeam", "ProductLead"],
     commitments: [
@@ -114,10 +141,16 @@ const issues: Issue[] = [
     ],
     threads: [{ title: "Re: Staging env request — urgent", lastActivity: "3d ago" }],
     artifacts: [{ type: "email", title: "Infrastructure request follow-up", date: "Mar 10" }],
+    lifecycle: [
+      { action: "Marked as blocked", actor: "DevOps", timestamp: "3d ago" },
+      { action: "Migration script completed", actor: "DevOps", timestamp: "4d ago" },
+      { action: "Issue created", actor: "ProductLead", timestamp: "9d ago" },
+    ],
   },
   {
     id: "iss-005", title: "Vendor Contract Renewal", state: "waiting_on_other", type: "operations",
     severity: "medium", priority_score: 0.62, recommended_move: "follow_up",
+    lastActivity: "2d ago",
     reasoning: ["Waiting on vendor response", "Contract expires in 2 weeks"],
     participants: ["Procurement", "VendorContact"],
     commitments: [
@@ -126,10 +159,15 @@ const issues: Issue[] = [
     ],
     threads: [{ title: "Contract renewal — Vendor X", lastActivity: "2d ago" }],
     artifacts: [{ type: "document", title: "Current contract terms", date: "Feb 28" }],
+    lifecycle: [
+      { action: "Follow-up recommended", actor: "System", timestamp: "2d ago" },
+      { action: "Issue created", actor: "Procurement", timestamp: "14d ago" },
+    ],
   },
   {
     id: "iss-006", title: "Engineering Hiring Pipeline", state: "active", type: "hiring",
     severity: "medium", priority_score: 0.55, recommended_move: "delegate",
+    lastActivity: "1d ago",
     reasoning: ["5 open positions", "Interview backlog growing"],
     participants: ["HR", "EngineeringLead"],
     commitments: [
@@ -138,10 +176,15 @@ const issues: Issue[] = [
     ],
     threads: [{ title: "Hiring pipeline update", lastActivity: "1d ago" }],
     artifacts: [{ type: "meeting_note", title: "Hiring sync Mar 10", date: "Mar 10" }],
+    lifecycle: [
+      { action: "Delegation recommended", actor: "System", timestamp: "1d ago" },
+      { action: "Issue created", actor: "HR", timestamp: "7d ago" },
+    ],
   },
   {
     id: "iss-007", title: "SOC 2 Report Delivered", state: "resolved", type: "compliance",
     severity: "low", priority_score: 0.15, recommended_move: "close",
+    lastActivity: "5d ago",
     reasoning: ["Report delivered and accepted", "No open items"],
     participants: ["ComplianceTeam"],
     commitments: [
@@ -149,10 +192,16 @@ const issues: Issue[] = [
     ],
     threads: [{ title: "SOC 2 — final delivery", lastActivity: "5d ago" }],
     artifacts: [{ type: "document", title: "SOC 2 Type II Report", date: "Mar 08" }],
+    lifecycle: [
+      { action: "Resolved — report accepted", actor: "ComplianceTeam", timestamp: "5d ago" },
+      { action: "Report delivered", actor: "ComplianceTeam", timestamp: "6d ago" },
+      { action: "Issue created", actor: "System", timestamp: "30d ago" },
+    ],
   },
   {
     id: "iss-008", title: "Customer Escalation — Acme", state: "resolved", type: "operations",
     severity: "high", priority_score: 0.10, recommended_move: "close",
+    lastActivity: "4d ago",
     reasoning: ["Issue resolved", "Customer confirmed"],
     participants: ["Support", "AccountManager"],
     commitments: [
@@ -163,6 +212,11 @@ const issues: Issue[] = [
     artifacts: [
       { type: "email", title: "Acme — resolution confirmation", date: "Mar 09" },
       { type: "meeting_note", title: "Post-mortem Mar 10", date: "Mar 10" },
+    ],
+    lifecycle: [
+      { action: "Resolved — customer confirmed", actor: "AccountManager", timestamp: "4d ago" },
+      { action: "Root cause analysis completed", actor: "Support", timestamp: "7d ago" },
+      { action: "Escalation received", actor: "Support", timestamp: "10d ago" },
     ],
   },
 ];
@@ -208,6 +262,14 @@ const stateBg: Record<IssueState, string> = {
   resolved: "bg-success/10",
 };
 
+const stateDot: Record<IssueState, string> = {
+  active: "bg-[hsl(var(--info))]",
+  waiting_on_me: "bg-[hsl(var(--warning))]",
+  waiting_on_other: "bg-[hsl(48_85%_52%)]",
+  blocked: "bg-[hsl(var(--critical))]",
+  resolved: "bg-[hsl(var(--success))]",
+};
+
 const stateLabel: Record<IssueState, string> = {
   active: "Active",
   waiting_on_me: "Waiting on Me",
@@ -217,11 +279,27 @@ const stateLabel: Record<IssueState, string> = {
 };
 
 const moveLabel: Record<Move, string> = {
-  escalate: "Escalate",
-  follow_up: "Follow Up",
-  decide: "Decide",
-  delegate: "Delegate",
-  close: "Close",
+  escalate: "ESCALATE",
+  follow_up: "FOLLOW UP",
+  decide: "DECIDE",
+  delegate: "DELEGATE",
+  close: "CLOSE",
+};
+
+const moveColor: Record<Move, string> = {
+  escalate: "text-critical",
+  follow_up: "text-info",
+  decide: "text-warning",
+  delegate: "text-muted-foreground",
+  close: "text-success",
+};
+
+const moveBg: Record<Move, string> = {
+  escalate: "bg-critical/10",
+  follow_up: "bg-info/10",
+  decide: "bg-warning/10",
+  delegate: "bg-muted",
+  close: "bg-success/10",
 };
 
 const severityToStatus: Record<Severity, StatusType> = {
@@ -245,6 +323,14 @@ const artifactIcon = (type: Artifact["type"]) => {
   }
 };
 
+const typeLabel: Record<IssueType, string> = {
+  compliance: "Compliance",
+  budget: "Budget",
+  delivery: "Delivery",
+  operations: "Operations",
+  hiring: "Hiring",
+};
+
 type TileFilter = "attention" | "waiting_on_me" | "waiting_on_other" | "blocked" | "resolved" | null;
 
 /* ── Component ─────────────────────────────────────────── */
@@ -259,7 +345,6 @@ export default function ResolutionBoard() {
   const [sortBy, setSortBy] = useState<string>("priority");
   const [tileFilter, setTileFilter] = useState<TileFilter>(null);
 
-  // Computed counts
   const counts = {
     attention: issues.filter(i => i.state !== "resolved" && i.priority_score >= 0.6).length,
     waiting_on_me: issues.filter(i => i.state === "waiting_on_me").length,
@@ -268,11 +353,9 @@ export default function ResolutionBoard() {
     resolved: issues.filter(i => i.state === "resolved").length,
   };
 
-  // All unique participants
   const allParticipants = [...new Set(issues.flatMap(i => i.participants))].sort();
   const allTypes = [...new Set(issues.map(i => i.type))].sort();
 
-  // Filter & sort
   const filtered = issues
     .filter(i => {
       if (search && !i.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -280,14 +363,11 @@ export default function ResolutionBoard() {
       if (stateFilter !== "all" && i.state !== stateFilter) return false;
       if (personFilter !== "all" && !i.participants.includes(personFilter)) return false;
       if (typeFilter !== "all" && i.type !== typeFilter) return false;
-
-      // Tile filters
       if (tileFilter === "attention" && (i.state === "resolved" || i.priority_score < 0.6)) return false;
       if (tileFilter === "waiting_on_me" && i.state !== "waiting_on_me") return false;
       if (tileFilter === "waiting_on_other" && i.state !== "waiting_on_other") return false;
       if (tileFilter === "blocked" && i.state !== "blocked") return false;
       if (tileFilter === "resolved" && i.state !== "resolved") return false;
-
       return true;
     })
     .sort((a, b) => {
@@ -296,7 +376,7 @@ export default function ResolutionBoard() {
         const order: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
         return order[a.severity] - order[b.severity];
       }
-      return 0; // recent activity not tracked in mock
+      return 0;
     });
 
   const openIssue = (issue: Issue) => {
@@ -319,11 +399,22 @@ export default function ResolutionBoard() {
   return (
     <div className="p-6 space-y-6 max-w-[1400px]">
       {/* Header */}
-      <div>
-        <h1 className="font-display text-xl font-semibold text-foreground">Resolution Board</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Unresolved issues across meetings, emails, and commitments
-        </p>
+      <div className="flex items-end justify-between">
+        <div>
+          <h1 className="font-display text-xl font-semibold text-foreground">Resolution Board</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Unresolved issues across meetings, emails, and commitments
+          </p>
+        </div>
+        {/* State Color Legend */}
+        <div className="flex items-center gap-4">
+          {(Object.entries(stateLabel) as [IssueState, string][]).map(([state, label]) => (
+            <div key={state} className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${stateDot[state]}`} />
+              <span className="text-[10px] text-muted-foreground">{label}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Summary Tiles */}
@@ -338,14 +429,14 @@ export default function ResolutionBoard() {
           <button
             key={tile.key}
             onClick={() => handleTileClick(tile.key)}
-            className={`rounded-lg border border-border bg-card p-4 text-left transition-colors hover:bg-accent ${
+            className={`rounded-lg border border-border bg-card p-4 text-left transition-all hover:bg-accent cursor-pointer ${
               tileFilter === tile.key ? "ring-1 ring-primary border-primary" : ""
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <tile.icon className={`h-4 w-4 ${tile.color}`} />
               {tileFilter === tile.key && (
-                <span className="text-[10px] font-medium text-primary uppercase tracking-wider">filtered</span>
+                <span className="text-[10px] font-medium text-primary uppercase tracking-wider">active</span>
               )}
             </div>
             <div className={`font-mono text-2xl font-semibold tabular-nums ${tile.color}`}>
@@ -435,11 +526,9 @@ export default function ResolutionBoard() {
                   onClick={() => openIssue(issue)}
                   className="flex items-center gap-4 px-4 py-3.5 w-full text-left hover:bg-accent/50 transition-colors group"
                 >
-                  {/* Left: priority dot + info */}
+                  {/* Left: state dot + info */}
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${
-                      issue.priority_score >= 0.8 ? "bg-critical" : issue.priority_score >= 0.6 ? "bg-warning" : "bg-muted-foreground"
-                    }`} />
+                    <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${stateDot[issue.state]}`} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium text-foreground truncate">{issue.title}</span>
@@ -447,6 +536,7 @@ export default function ResolutionBoard() {
                           {stateLabel[issue.state]}
                         </span>
                       </div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5 capitalize">{typeLabel[issue.type]}</div>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
@@ -457,18 +547,23 @@ export default function ResolutionBoard() {
                         {overdueCount(issue) > 0 && (
                           <span className="text-critical">Overdue: {overdueCount(issue)}</span>
                         )}
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {issue.lastActivity}
+                        </span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: score + move */}
-                  <div className="text-right shrink-0">
-                    <div className={`font-mono text-sm font-semibold tabular-nums ${priorityIcon(issue.priority_score)}`}>
-                      {issue.priority_score.toFixed(2)}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
+                  {/* Right: recommended move (dominant) + priority score (subtle) */}
+                  <div className="text-right shrink-0 flex flex-col items-end gap-1">
+                    <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold tracking-wide ${moveColor[issue.recommended_move]} ${moveBg[issue.recommended_move]}`}>
+                      <ArrowUpRight className="h-3 w-3" />
                       {moveLabel[issue.recommended_move]}
-                    </div>
+                    </span>
+                    <span className={`font-mono text-[10px] tabular-nums ${priorityIcon(issue.priority_score)}`}>
+                      {issue.priority_score.toFixed(2)}
+                    </span>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                 </button>
@@ -506,12 +601,8 @@ export default function ResolutionBoard() {
                   {ctx.issues.map(iss => (
                     <div key={iss.title} className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground truncate">{iss.title}</span>
-                      <span className={`shrink-0 ml-2 font-medium ${
-                        iss.move === "escalate" ? "text-critical" :
-                        iss.move === "decide" ? "text-warning" :
-                        "text-info"
-                      }`}>
-                        {moveLabel[iss.move].toLowerCase()}
+                      <span className={`shrink-0 ml-2 font-bold text-[10px] tracking-wide ${moveColor[iss.move]}`}>
+                        {moveLabel[iss.move]}
                       </span>
                     </div>
                   ))}
@@ -524,10 +615,19 @@ export default function ResolutionBoard() {
 
       {/* Detail Drawer */}
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <SheetContent className="w-[480px] sm:max-w-[480px] overflow-y-auto bg-card border-border">
+        <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto bg-card border-border">
           {selectedIssue && (
             <>
               <SheetHeader className="pb-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold tracking-wide ${moveColor[selectedIssue.recommended_move]} ${moveBg[selectedIssue.recommended_move]}`}>
+                    <ArrowUpRight className="h-3 w-3" />
+                    {moveLabel[selectedIssue.recommended_move]}
+                  </span>
+                  <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-medium ${stateColor[selectedIssue.state]} ${stateBg[selectedIssue.state]}`}>
+                    {stateLabel[selectedIssue.state]}
+                  </span>
+                </div>
                 <SheetTitle className="font-display text-lg">{selectedIssue.title}</SheetTitle>
                 <SheetDescription className="sr-only">Issue detail view</SheetDescription>
               </SheetHeader>
@@ -536,16 +636,10 @@ export default function ResolutionBoard() {
                 {/* Overview */}
                 <section className="space-y-3">
                   <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Overview</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <span className="text-[10px] text-muted-foreground uppercase">State</span>
-                      <div className={`text-sm font-medium ${stateColor[selectedIssue.state]}`}>
-                        {stateLabel[selectedIssue.state]}
-                      </div>
-                    </div>
+                  <div className="grid grid-cols-3 gap-3">
                     <div className="space-y-1">
                       <span className="text-[10px] text-muted-foreground uppercase">Type</span>
-                      <div className="text-sm font-medium text-foreground capitalize">{selectedIssue.type}</div>
+                      <div className="text-sm font-medium text-foreground capitalize">{typeLabel[selectedIssue.type]}</div>
                     </div>
                     <div className="space-y-1">
                       <span className="text-[10px] text-muted-foreground uppercase">Severity</span>
@@ -556,10 +650,6 @@ export default function ResolutionBoard() {
                       <div className={`font-mono text-sm font-semibold ${priorityIcon(selectedIssue.priority_score)}`}>
                         {selectedIssue.priority_score.toFixed(2)}
                       </div>
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <span className="text-[10px] text-muted-foreground uppercase">Recommended Move</span>
-                      <div className="text-sm font-medium text-primary">{moveLabel[selectedIssue.recommended_move]}</div>
                     </div>
                   </div>
                   {/* Reasoning */}
@@ -659,6 +749,25 @@ export default function ResolutionBoard() {
                         </div>
                       );
                     })}
+                  </div>
+                </section>
+
+                {/* Lifecycle Events */}
+                <section className="space-y-2">
+                  <h3 className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Lifecycle</h3>
+                  <div className="relative pl-4">
+                    <div className="absolute left-[7px] top-1 bottom-1 w-px bg-border" />
+                    <div className="space-y-3">
+                      {selectedIssue.lifecycle.map((evt, i) => (
+                        <div key={i} className="relative flex items-start gap-3">
+                          <div className={`absolute left-[-13px] top-1 h-2 w-2 rounded-full ${i === 0 ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-foreground">{evt.action}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{evt.actor} · {evt.timestamp}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </section>
               </div>
