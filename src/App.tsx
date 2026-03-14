@@ -11,6 +11,7 @@ import Incidents from "./pages/Incidents";
 import Schedule from "./pages/Schedule";
 import Timeline from "./pages/Timeline";
 import Watchtower from "./pages/Watchtower";
+import ResolutionBoard from "./pages/ResolutionBoard";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
