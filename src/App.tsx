@@ -26,6 +26,7 @@ const App = () => (
         <Layout>
           <Routes>
             <Route path="/" element={<Command />} />
+            <Route path="/command/resolution" element={<ResolutionBoard />} />
             <Route path="/floor" element={<Floor />} />
             <Route path="/ops" element={<Ops />} />
             <Route path="/incidents" element={<Incidents />} />
