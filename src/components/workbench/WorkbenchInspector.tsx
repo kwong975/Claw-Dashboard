@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 import { interactionIcon, momentumConfig } from "@/lib/attention";
 import type { Matter } from "@/lib/attention-types";
-import type { InspectedObject, WorkbenchAction } from "@/lib/workbench-types";
+import type { InspectedObject, WorkbenchAction, WorkbenchViewMode } from "@/lib/workbench-types";
 import { useState } from "react";
 import {
   CalendarDays, User, Clock, Tag, ArrowRight, Unlink, Plus, Trash2,
-  RefreshCw, ArrowUpRight, AlertTriangle, StickyNote, X
+  RefreshCw, ArrowUpRight, AlertTriangle, StickyNote, X, ListChecks
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -15,11 +15,18 @@ interface WorkbenchInspectorProps {
   matter: Matter | null;
   allMatters: Matter[];
   inspected: InspectedObject | null;
+  viewMode: WorkbenchViewMode;
   onAction: (action: WorkbenchAction) => void;
   onClose: () => void;
 }
 
-export function WorkbenchInspector({ matter, allMatters, inspected, onAction, onClose }: WorkbenchInspectorProps) {
+const emptyStateMessages: Record<WorkbenchViewMode, string> = {
+  structure: "Select an interaction, commitment, or signal to inspect",
+  timeline: "Select a timeline event to inspect",
+  replay: "Select a replay event to inspect system decisions and repair options",
+};
+
+export function WorkbenchInspector({ matter, allMatters, inspected, viewMode, onAction, onClose }: WorkbenchInspectorProps) {
   if (!matter || !inspected) {
     return (
       <div className="flex h-full flex-col border-l border-border">
@@ -28,7 +35,7 @@ export function WorkbenchInspector({ matter, allMatters, inspected, onAction, on
         </div>
         <div className="flex flex-1 items-center justify-center p-6">
           <p className="text-center text-[11px] text-muted-foreground">
-            Select an interaction, commitment, or signal to inspect
+            {emptyStateMessages[viewMode]}
           </p>
         </div>
       </div>
@@ -183,7 +190,6 @@ function CommitmentInspector({ matter, index, otherMatters, onAction }: {
       <div className="border-t border-border pt-3 space-y-2">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Actions</p>
 
-        {/* Reassign */}
         <div className="flex items-center gap-1.5">
           <input
             type="text"
@@ -201,7 +207,6 @@ function CommitmentInspector({ matter, index, otherMatters, onAction }: {
           </button>
         </div>
 
-        {/* Reschedule */}
         <div className="flex items-center gap-1.5">
           <input
             type="text"
@@ -273,7 +278,6 @@ function ParticipantInspector({ matter, index }: { matter: Matter; index: number
   if (!name) return null;
 
   const relatedCommitments = matter.commitments.filter(c => c.owner === name);
-  const relatedInteractions = matter.interactions;
 
   return (
     <div className="space-y-4">

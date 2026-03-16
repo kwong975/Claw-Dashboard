@@ -1,6 +1,7 @@
 import type { Matter } from "./attention-types";
 import type {
   WorkbenchAction,
+  WorkbenchActionResult,
   RepairSuggestion,
   MatterWarning,
   ReplayEvent,
@@ -116,7 +117,6 @@ export function deriveRepairSuggestions(matters: Matter[], selectedMatterId: str
 /* ── Derive replay events ────────────────────────────── */
 
 function parseDateKey(dateStr: string): number {
-  // Parse "Mar 16" style dates for sorting (year 2026 assumed)
   const months: Record<string, number> = {
     jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
     jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
@@ -130,7 +130,6 @@ function parseDateKey(dateStr: string): number {
 export function deriveReplayEvents(matter: Matter): ReplayEvent[] {
   const events: ReplayEvent[] = [];
 
-  // Interactions as detection events
   matter.interactions.forEach((interaction, i) => {
     const sortKey = parseDateKey(interaction.date);
     events.push({
@@ -144,13 +143,11 @@ export function deriveReplayEvents(matter: Matter): ReplayEvent[] {
     });
   });
 
-  // Signals
   matter.signals.forEach((signal, i) => {
-    // Derive approximate timestamp from source context
     const sortKey = parseDateKey(signal.timestamp.includes("ago") ? "Mar 16" : signal.timestamp);
     events.push({
       timestamp: signal.timestamp,
-      sortKey: sortKey + i, // slight offset for ordering
+      sortKey: sortKey + i,
       eventType: "signal",
       objectIndex: i,
       title: "System created signal",
@@ -159,9 +156,7 @@ export function deriveReplayEvents(matter: Matter): ReplayEvent[] {
     });
   });
 
-  // Commitments
   matter.commitments.forEach((c, i) => {
-    // Use origin interaction date if available, else approximate from due date
     let sortKey: number;
     if (c.origin) {
       const sourceInteraction = matter.interactions.find(
@@ -170,7 +165,7 @@ export function deriveReplayEvents(matter: Matter): ReplayEvent[] {
       );
       sortKey = sourceInteraction ? parseDateKey(sourceInteraction.date) + 1 : parseDateKey(c.due);
     } else {
-      sortKey = parseDateKey(c.due) - 86400000; // 1 day before due
+      sortKey = parseDateKey(c.due) - 86400000;
     }
 
     events.push({
@@ -193,12 +188,12 @@ export function deriveReplayEvents(matter: Matter): ReplayEvent[] {
   return events;
 }
 
-/* ── Apply workbench action (reducer) ────────────────── */
+/* ── Apply workbench action (returns rich result) ────── */
 
 export function applyWorkbenchAction(
   matters: Matter[],
   action: WorkbenchAction
-): Matter[] {
+): WorkbenchActionResult {
   const result = matters.map(m => ({
     ...m,
     interactions: [...m.interactions],
@@ -208,29 +203,36 @@ export function applyWorkbenchAction(
   }));
 
   const source = result.find(m => m.id === action.sourceMatterId);
-  if (!source) return result;
+  if (!source) return { matters: result, clearInspection: false };
 
   const target = action.payload?.targetMatterId
     ? result.find(m => m.id === action.payload!.targetMatterId)
     : undefined;
+
+  let selectMatterId: string | undefined;
+  let createdMatterId: string | undefined;
+  const clear = shouldClearInspection(action);
 
   switch (action.type) {
     case "moveInteraction": {
       if (!target) break;
       const [item] = source.interactions.splice(action.objectIndex, 1);
       if (item) target.interactions.push(item);
+      selectMatterId = target.id;
       break;
     }
     case "moveCommitment": {
       if (!target) break;
       const [item] = source.commitments.splice(action.objectIndex, 1);
       if (item) target.commitments.push(item);
+      selectMatterId = target.id;
       break;
     }
     case "moveSignal": {
       if (!target) break;
       const [item] = source.signals.splice(action.objectIndex, 1);
       if (item) target.signals.push(item);
+      selectMatterId = target.id;
       break;
     }
     case "detachInteraction": {
@@ -289,8 +291,9 @@ export function applyWorkbenchAction(
       const interaction = source.interactions[action.objectIndex];
       if (interaction) {
         source.interactions.splice(action.objectIndex, 1);
+        const newId = `m-new-${Date.now()}`;
         const newMatter: Matter = {
-          id: `m-new-${Date.now()}`,
+          id: newId,
           title: interaction.title,
           participants: [],
           momentum: "quiet",
@@ -301,10 +304,12 @@ export function applyWorkbenchAction(
           lastActivityRelative: "just now",
         };
         result.push(newMatter);
+        selectMatterId = newId;
+        createdMatterId = newId;
       }
       break;
     }
   }
 
-  return result;
+  return { matters: result, selectMatterId, clearInspection: clear, createdMatterId };
 }

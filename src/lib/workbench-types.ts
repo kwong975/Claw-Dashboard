@@ -36,6 +36,15 @@ export interface WorkbenchAction {
   };
 }
 
+/* ── Action Result (richer post-action info) ─────────── */
+
+export interface WorkbenchActionResult {
+  matters: Matter[];
+  selectMatterId?: string;
+  clearInspection: boolean;
+  createdMatterId?: string;
+}
+
 /* ── Repair Suggestion ───────────────────────────────── */
 
 export interface RepairSuggestion {

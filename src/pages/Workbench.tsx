@@ -7,7 +7,6 @@ import {
   applyWorkbenchAction,
   deriveRepairSuggestions,
   describeWorkbenchAction,
-  shouldClearInspection,
 } from "@/lib/workbench";
 import { MatterNavigator } from "@/components/workbench/MatterNavigator";
 import { MatterStructureView } from "@/components/workbench/MatterStructureView";
@@ -15,14 +14,8 @@ import { WorkbenchInspector } from "@/components/workbench/WorkbenchInspector";
 import { WorkbenchSuggestions } from "@/components/workbench/WorkbenchSuggestions";
 import { WorkbenchReplayView } from "@/components/workbench/WorkbenchReplayView";
 import { WorkbenchTimelineView } from "@/components/workbench/WorkbenchTimelineView";
+import { WorkbenchModeToggle } from "@/components/workbench/WorkbenchModeToggle";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-const viewModes: { value: WorkbenchViewMode; label: string }[] = [
-  { value: "structure", label: "Structure" },
-  { value: "timeline", label: "Timeline" },
-  { value: "replay", label: "Replay" },
-];
 
 export default function Workbench() {
   const [matters, setMatters] = useState<Matter[]>(() => [...mockMatters]);
@@ -45,11 +38,27 @@ export default function Workbench() {
     setInspected(null);
   }, []);
 
+  const handleModeChange = useCallback((mode: WorkbenchViewMode) => {
+    setViewMode(mode);
+    setInspected(null); // Clear inspector on mode switch
+  }, []);
+
   const handleAction = useCallback((action: WorkbenchAction) => {
-    setMatters(prev => applyWorkbenchAction(prev, action));
-    if (shouldClearInspection(action)) {
-      setInspected(null);
-    }
+    setMatters(prev => {
+      const result = applyWorkbenchAction(prev, action);
+
+      // Post-action: select new/target matter if applicable
+      if (result.selectMatterId) {
+        setSelectedMatterId(result.selectMatterId);
+      }
+
+      if (result.clearInspection) {
+        setInspected(null);
+      }
+
+      return result.matters;
+    });
+
     toast.success(describeWorkbenchAction(action));
   }, []);
 
@@ -68,26 +77,13 @@ export default function Workbench() {
         />
       </div>
 
-      {/* Center: Structure / Replay View — flex */}
+      {/* Center: Structure / Timeline / Replay — flex */}
       <div className="flex-1 min-w-0 flex flex-col">
         {selectedMatter ? (
           <>
             {/* View mode toggle */}
-            <div className="flex items-center gap-1 px-6 pt-4">
-              {viewModes.map(mode => (
-                <button
-                  key={mode.value}
-                  onClick={() => setViewMode(mode.value)}
-                  className={cn(
-                    "rounded-md px-3 py-1 text-[11px] font-medium transition-colors",
-                    viewMode === mode.value
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
-                  )}
-                >
-                  {mode.label}
-                </button>
-              ))}
+            <div className="px-6 pt-4">
+              <WorkbenchModeToggle value={viewMode} onChange={handleModeChange} />
             </div>
 
             {/* Suggestions (structure mode only) */}
@@ -109,12 +105,18 @@ export default function Workbench() {
                 />
               )}
               {viewMode === "timeline" && (
-                <WorkbenchTimelineView matter={selectedMatter} />
+                <WorkbenchTimelineView
+                  matter={selectedMatter}
+                  inspected={inspected}
+                  onInspect={setInspected}
+                />
               )}
               {viewMode === "replay" && (
                 <WorkbenchReplayView
                   matter={selectedMatter}
                   allMatters={matters}
+                  inspected={inspected}
+                  onInspect={setInspected}
                   onAction={handleAction}
                 />
               )}
@@ -133,6 +135,7 @@ export default function Workbench() {
           matter={selectedMatter}
           allMatters={matters}
           inspected={inspected}
+          viewMode={viewMode}
           onAction={handleAction}
           onClose={() => setInspected(null)}
         />
