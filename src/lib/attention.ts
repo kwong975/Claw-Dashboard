@@ -164,3 +164,55 @@ export function totalOverdueCount(matters: Matter[]): number {
 export function findMatterById(matters: Matter[], id: string): Matter | undefined {
   return matters.find(m => m.id === id);
 }
+
+/* ── Last Meaningful Activity ─────────────────────────── */
+
+export function lastMeaningfulActivity(m: Matter): string {
+  // Prioritize signals > interactions > generic
+  if (m.signals.length > 0) {
+    const s = m.signals[0];
+    return `${s.description} — ${s.timestamp}`;
+  }
+  if (m.interactions.length > 0) {
+    const i = m.interactions[0];
+    return `${i.title} — ${i.relative}`;
+  }
+  return `Last activity ${m.lastActivityRelative}`;
+}
+
+/* ── Commitment Action Reducer ────────────────────────── */
+
+export function applyCommitmentAction(matter: Matter, action: CommitmentAction): Matter {
+  const commitments = [...matter.commitments];
+  const c = { ...commitments[action.commitmentIndex] };
+
+  switch (action.type) {
+    case "complete":
+      c.status = "done";
+      break;
+    case "reopen":
+      c.status = "open";
+      break;
+    case "reassign":
+      if (action.payload) c.owner = action.payload;
+      break;
+    case "reschedule":
+      if (action.payload) {
+        c.due = action.payload;
+        if (c.status === "overdue") c.status = "open";
+      }
+      break;
+    case "addNote":
+      c.note = action.payload || undefined;
+      break;
+    case "escalate":
+      c.escalated = true;
+      break;
+    case "deescalate":
+      c.escalated = false;
+      break;
+  }
+
+  commitments[action.commitmentIndex] = c;
+  return { ...matter, commitments };
+}
