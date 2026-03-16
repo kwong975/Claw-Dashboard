@@ -57,7 +57,7 @@ export default function Workbench() {
   }, [handleAction]);
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-1 min-h-0">
       {/* Left: Matter Navigator — 260px */}
       <div className="w-[260px] shrink-0">
         <MatterNavigator
