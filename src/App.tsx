@@ -13,6 +13,7 @@ import Timeline from "./pages/Timeline";
 import Watchtower from "./pages/Watchtower";
 import ResolutionBoard from "./pages/ResolutionBoard";
 import Settings from "./pages/Settings";
+import Workbench from "./pages/Workbench";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
