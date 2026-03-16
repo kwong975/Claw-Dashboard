@@ -93,8 +93,8 @@ export const mockMatters: Matter[] = [
       { title: "Contract renewal — Vendor X", type: "email", date: "Mar 11", relative: "5 days ago" },
     ],
     commitments: [
-      { owner: "Vendor Contact", title: "Send revised terms", status: "overdue", due: "Mar 14" },
-      { owner: "Procurement", title: "Internal review", status: "open", due: "Mar 18" },
+      { owner: "Vendor Contact", title: "Send revised terms", status: "overdue", due: "Mar 14", origin: { label: "Contract renewal — Vendor X", type: "email" } },
+      { owner: "Procurement", title: "Internal review", status: "open", due: "Mar 18", origin: { label: "Contract renewal — Vendor X", type: "email" } },
     ],
     signals: [
       { description: "Contract expires in 2 weeks", source: "System", timestamp: "2d ago" },
