@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import {
   Users, AlertTriangle, CalendarDays,
   ChevronRight, Activity, Eye, CircleDot,
-  User, CheckCircle2, Timer, TrendingDown, Zap,
+  User, Timer, TrendingDown, Zap,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -16,6 +16,7 @@ import {
   deriveRecentInteractions, deriveUrgentCommitments, deriveDriftingMatters,
   totalOverdueCount, findMatterById,
 } from "@/lib/attention";
+import { DrawerCommitments } from "@/components/DrawerCommitments";
 import type { Matter } from "@/lib/attention-types";
 
 /* ── Constants ─────────────────────────────────────────── */
@@ -27,9 +28,10 @@ const MAX_VISIBLE_PARTICIPANTS = 3;
 export default function ResolutionBoard() {
   const [selectedMatter, setSelectedMatter] = useState<Matter | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [mattersState, setMattersState] = useState<Matter[]>(mockMatters);
 
-  // Future: replace mockMatters with API data
-  const matters = mockMatters;
+  // Future: replace mattersState with API data
+  const matters = mattersState;
 
   /* ── Memoized derivations ───────────────────────────── */
   const sorted        = useMemo(() => sortByAttention(matters), [matters]);
