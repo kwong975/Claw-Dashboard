@@ -38,8 +38,8 @@ export const mockMatters: Matter[] = [
       { title: "Q2 Budget — final numbers", type: "email", date: "Mar 14", relative: "2 days ago" },
     ],
     commitments: [
-      { owner: "You", title: "Approve budget allocation", status: "open", due: "Mar 16" },
-      { owner: "Finance Team", title: "Prepare final numbers", status: "done", due: "Mar 12" },
+      { owner: "You", title: "Approve budget allocation", status: "open", due: "Mar 16", origin: { label: "Board Prep Session", type: "meeting" } },
+      { owner: "Finance Team", title: "Prepare final numbers", status: "done", due: "Mar 12", origin: { label: "Q2 Budget — final numbers", type: "email" } },
     ],
     signals: [
       { description: "Board meeting in 5 days — approval needed", source: "System", timestamp: "4h ago" },
