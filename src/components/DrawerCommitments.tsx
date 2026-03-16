@@ -1,13 +1,22 @@
 import { useState } from "react";
 import {
   UserRoundPen, CalendarClock, StickyNote, AlertTriangle, Send,
+  CalendarDays, Mail, MessageSquare,
 } from "lucide-react";
 import { CheckCircle2 } from "lucide-react";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type { Commitment, CommitmentAction } from "@/lib/attention-types";
+import type { Commitment, CommitmentAction, InteractionType } from "@/lib/attention-types";
+
+const originIcon = (type: InteractionType) => {
+  switch (type) {
+    case "meeting": return CalendarDays;
+    case "email": return Mail;
+    case "discussion": return MessageSquare;
+  }
+};
 
 /* ── Types ─────────────────────────────────────────────── */
 
