@@ -13,6 +13,7 @@ import Timeline from "./pages/Timeline";
 import Watchtower from "./pages/Watchtower";
 import ResolutionBoard from "./pages/ResolutionBoard";
 import Settings from "./pages/Settings";
+import Workbench from "./pages/Workbench";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/timeline" element={<Timeline />} />
             <Route path="/watchtower" element={<Watchtower />} />
+            <Route path="/workbench" element={<Workbench />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

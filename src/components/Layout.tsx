@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings, ListChecks } from "lucide-react";
+import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Settings, ListChecks, Wrench } from "lucide-react";
 
 const nav = [
   { label: "Command",    to: "/",          icon: Terminal },
@@ -11,6 +11,7 @@ const nav = [
   { label: "Schedule",   to: "/schedule",  icon: Clock },
   { label: "Timeline",   to: "/timeline",  icon: Activity },
   { label: "Watchtower", to: "/watchtower", icon: Eye },
+  { label: "Workbench", to: "/workbench",  icon: Wrench },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
