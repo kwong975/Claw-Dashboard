@@ -75,8 +75,8 @@ export const mockMatters: Matter[] = [
       { title: "Re: Staging env request — urgent", type: "email", date: "Mar 13", relative: "3 days ago" },
     ],
     commitments: [
-      { owner: "Infra Team", title: "Provision staging environment", status: "overdue", due: "Mar 09" },
-      { owner: "DevOps", title: "Migration script ready", status: "done", due: "Mar 10" },
+      { owner: "Infra Team", title: "Provision staging environment", status: "overdue", due: "Mar 09", origin: { label: "Staging env request", type: "email" } },
+      { owner: "DevOps", title: "Migration script ready", status: "done", due: "Mar 10", origin: { label: "Migration kickoff", type: "meeting" } },
     ],
     signals: [
       { description: "No response from Infra Team in 3 days", source: "System", timestamp: "3d ago" },
