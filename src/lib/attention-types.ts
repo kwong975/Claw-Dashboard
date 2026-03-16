@@ -14,6 +14,7 @@ export interface Commitment {
   due: string;
   escalated?: boolean;
   note?: string;
+  origin?: { label: string; type: InteractionType };
 }
 
 export interface Interaction {
