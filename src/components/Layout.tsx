@@ -5,13 +5,13 @@ import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Se
 const nav = [
   { label: "Command",    to: "/",          icon: Terminal },
   { label: "Attention",  to: "/command/resolution", icon: ListChecks },
+  { label: "Workbench",  to: "/workbench",  icon: Wrench },
   { label: "Floor",      to: "/floor",     icon: LayoutGrid },
   { label: "Ops",        to: "/ops",       icon: Columns3 },
   { label: "Incidents",  to: "/incidents", icon: AlertTriangle },
   { label: "Schedule",   to: "/schedule",  icon: Clock },
   { label: "Timeline",   to: "/timeline",  icon: Activity },
   { label: "Watchtower", to: "/watchtower", icon: Eye },
-  { label: "Workbench", to: "/workbench",  icon: Wrench },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
