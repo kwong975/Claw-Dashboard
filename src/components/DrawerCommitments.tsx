@@ -214,6 +214,10 @@ export function DrawerCommitments({ commitments, onAction, actedIndices }: Drawe
                   </p>
                 )}
               </div>
+              {/* Hover actions */}
+              {c.status !== "done" && (
+                <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                  <ReassignPopover
                     current={c.owner}
                     onSelect={(name) => onAction({ type: "reassign", commitmentIndex: idx, payload: name })}
                   />
