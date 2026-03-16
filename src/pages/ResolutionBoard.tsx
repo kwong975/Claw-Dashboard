@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import {
   Users, AlertTriangle, CalendarDays,
   ChevronRight, Activity, Eye, CircleDot,
-  User, Timer, TrendingDown, Zap,
+  User, Timer, TrendingDown, Zap, Clock,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -14,10 +14,11 @@ import {
   overdueCount, openCount, attentionSentence,
   sortByAttention, deriveNowItems,
   deriveRecentInteractions, deriveUrgentCommitments, deriveDriftingMatters,
-  totalOverdueCount, findMatterById,
+  totalOverdueCount, findMatterById, lastMeaningfulActivity,
+  applyCommitmentAction,
 } from "@/lib/attention";
 import { DrawerCommitments } from "@/components/DrawerCommitments";
-import type { Matter } from "@/lib/attention-types";
+import type { Matter, CommitmentAction } from "@/lib/attention-types";
 
 /* ── Constants ─────────────────────────────────────────── */
 
@@ -29,6 +30,7 @@ export default function ResolutionBoard() {
   const [selectedMatter, setSelectedMatter] = useState<Matter | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mattersState, setMattersState] = useState<Matter[]>(mockMatters);
+  const [actedIndices, setActedIndices] = useState<Set<number>>(new Set());
 
   // Future: replace mattersState with API data
   const matters = mattersState;
@@ -46,6 +48,7 @@ export default function ResolutionBoard() {
   const openMatter = useCallback((m: Matter) => {
     setSelectedMatter(m);
     setDrawerOpen(true);
+    setActedIndices(new Set());
   }, []);
 
   const openMatterById = useCallback((id: string) => {
@@ -53,10 +56,17 @@ export default function ResolutionBoard() {
     if (m) openMatter(m);
   }, [matters, openMatter]);
 
-  const handleUpdateMatter = useCallback((updated: Matter) => {
+  const handleCommitmentAction = useCallback((action: CommitmentAction) => {
+    if (!selectedMatter) return;
+    const updated = applyCommitmentAction(selectedMatter, action);
     setMattersState(prev => prev.map(m => m.id === updated.id ? updated : m));
     setSelectedMatter(updated);
-  }, []);
+    // Flash feedback
+    setActedIndices(prev => new Set(prev).add(action.commitmentIndex));
+    setTimeout(() => {
+      setActedIndices(prev => { const n = new Set(prev); n.delete(action.commitmentIndex); return n; });
+    }, 1200);
+  }, [selectedMatter]);
 
   return (
     <div className="p-6 space-y-5 max-w-[1440px]">
