@@ -14,6 +14,7 @@ import { MatterStructureView } from "@/components/workbench/MatterStructureView"
 import { WorkbenchInspector } from "@/components/workbench/WorkbenchInspector";
 import { WorkbenchSuggestions } from "@/components/workbench/WorkbenchSuggestions";
 import { WorkbenchReplayView } from "@/components/workbench/WorkbenchReplayView";
+import { WorkbenchTimelineView } from "@/components/workbench/WorkbenchTimelineView";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
