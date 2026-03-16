@@ -4,7 +4,7 @@ import { Terminal, LayoutGrid, Columns3, AlertTriangle, Clock, Activity, Eye, Se
 
 const nav = [
   { label: "Command",    to: "/",          icon: Terminal },
-  { label: "Resolution", to: "/command/resolution", icon: ListChecks },
+  { label: "Attention",  to: "/command/resolution", icon: ListChecks },
   { label: "Floor",      to: "/floor",     icon: LayoutGrid },
   { label: "Ops",        to: "/ops",       icon: Columns3 },
   { label: "Incidents",  to: "/incidents", icon: AlertTriangle },
