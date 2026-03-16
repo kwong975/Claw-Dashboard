@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { deriveReplayEvents } from "@/lib/workbench";
 import type { Matter } from "@/lib/attention-types";
-import type { ReplayEvent, WorkbenchAction } from "@/lib/workbench-types";
+import type { ReplayEvent, WorkbenchAction, InspectedObject } from "@/lib/workbench-types";
 import {
   CalendarDays, Mail, MessageSquare, AlertTriangle, ListChecks,
   ArrowRight, Unlink, Plus, MoreHorizontal, ChevronLeft, ChevronRight,
@@ -26,15 +26,16 @@ const originIcon: Record<string, React.ElementType> = {
 interface WorkbenchReplayViewProps {
   matter: Matter;
   allMatters: Matter[];
+  inspected: InspectedObject | null;
+  onInspect: (obj: InspectedObject | null) => void;
   onAction: (action: WorkbenchAction) => void;
 }
 
-export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchReplayViewProps) {
+export function WorkbenchReplayView({ matter, allMatters, inspected, onInspect, onAction }: WorkbenchReplayViewProps) {
   const events = useMemo(() => deriveReplayEvents(matter), [matter]);
   const [activeStep, setActiveStep] = useState<number | null>(null);
   const otherMatters = allMatters.filter(m => m.id !== matter.id);
 
-  // Group events by timestamp date
   const groups = useMemo(() => {
     const map = new Map<string, ReplayEvent[]>();
     for (const e of events) {
@@ -46,15 +47,21 @@ export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchR
     return Array.from(map.entries());
   }, [events]);
 
+  const handleEventClick = (event: ReplayEvent) => {
+    onInspect({
+      type: event.eventType as "interaction" | "commitment" | "signal",
+      index: event.objectIndex,
+      matterId: matter.id,
+    });
+  };
+
   return (
     <div className="h-full overflow-y-auto px-6 py-5">
-      {/* Header */}
       <div className="mb-1">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Replay Mode</p>
         <h2 className="font-display text-base font-semibold text-foreground mt-0.5">{matter.title}</h2>
       </div>
 
-      {/* Step navigation */}
       {events.length > 0 && (
         <div className="flex items-center gap-2 mb-5 mt-3">
           <button
@@ -85,13 +92,10 @@ export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchR
         </div>
       )}
 
-      {/* Timeline */}
       <div className="relative">
-        {/* Vertical line */}
         <div className="absolute left-[7px] top-0 bottom-0 w-px bg-border" />
 
         {groups.map(([dateLabel, groupEvents]) => {
-          // If stepping, only show events up to activeStep
           const visibleEvents = activeStep !== null
             ? groupEvents.filter(e => events.indexOf(e) <= activeStep)
             : groupEvents;
@@ -99,7 +103,6 @@ export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchR
 
           return (
             <div key={dateLabel} className="mb-5">
-              {/* Date marker */}
               <div className="relative flex items-center gap-3 mb-2">
                 <div className="relative z-10 h-[15px] w-[15px] rounded-full border-2 border-border bg-card flex items-center justify-center">
                   <div className="h-1.5 w-1.5 rounded-full bg-muted-foreground" />
@@ -107,21 +110,27 @@ export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchR
                 <span className="text-[11px] font-semibold text-foreground">{dateLabel}</span>
               </div>
 
-              {/* Events */}
               <div className="ml-[7px] border-l border-transparent pl-6 space-y-1.5">
                 {visibleEvents.map((event, ei) => {
                   const Icon = eventTypeIcon[event.eventType] ?? AlertTriangle;
                   const OriginIcon = event.origin ? originIcon[event.origin] : undefined;
                   const globalIndex = events.indexOf(event);
                   const isHighlighted = activeStep !== null && globalIndex === activeStep;
+                  const isSelected =
+                    inspected?.type === event.eventType &&
+                    inspected.index === event.objectIndex &&
+                    inspected.matterId === matter.id;
 
                   return (
                     <div
                       key={`${dateLabel}-${ei}`}
+                      onClick={() => handleEventClick(event)}
                       className={cn(
-                        "group rounded-md border px-3 py-2.5 transition-all",
-                        isHighlighted
+                        "group rounded-md border px-3 py-2.5 cursor-pointer transition-all",
+                        isSelected
                           ? "border-[hsl(var(--ring))] bg-accent shadow-sm"
+                          : isHighlighted
+                          ? "border-[hsl(var(--ring)/0.5)] bg-accent/60 shadow-sm"
                           : "border-border bg-card hover:bg-accent/40"
                       )}
                     >
@@ -138,11 +147,13 @@ export function WorkbenchReplayView({ matter, allMatters, onAction }: WorkbenchR
                           )}
                         </div>
 
-                        {/* Replay action menu for interactions */}
                         {event.eventType === "interaction" && (
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="opacity-0 group-hover:opacity-100 transition-opacity rounded p-1 hover:bg-secondary">
+                              <button
+                                onClick={e => e.stopPropagation()}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity rounded p-1 hover:bg-secondary"
+                              >
                                 <MoreHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
                               </button>
                             </DropdownMenuTrigger>
