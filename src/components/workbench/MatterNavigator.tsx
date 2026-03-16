@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { momentumConfig } from "@/lib/attention";
-import { deriveMatterWarnings } from "@/lib/workbench-types";
+import { deriveMatterWarnings } from "@/lib/workbench";
 import { AlertTriangle, Users, MessageSquare, ListChecks } from "lucide-react";
 import type { Matter } from "@/lib/attention-types";
 
