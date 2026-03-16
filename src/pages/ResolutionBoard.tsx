@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import {
   Users, AlertTriangle, CalendarDays,
   ChevronRight, Activity, Eye, CircleDot,
-  User, Timer, TrendingDown, Zap,
+  User, Timer, TrendingDown, Zap, Clock,
 } from "lucide-react";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -14,10 +14,11 @@ import {
   overdueCount, openCount, attentionSentence,
   sortByAttention, deriveNowItems,
   deriveRecentInteractions, deriveUrgentCommitments, deriveDriftingMatters,
-  totalOverdueCount, findMatterById,
+  totalOverdueCount, findMatterById, lastMeaningfulActivity,
+  applyCommitmentAction,
 } from "@/lib/attention";
 import { DrawerCommitments } from "@/components/DrawerCommitments";
-import type { Matter } from "@/lib/attention-types";
+import type { Matter, CommitmentAction } from "@/lib/attention-types";
 
 /* ── Constants ─────────────────────────────────────────── */
 
@@ -29,6 +30,7 @@ export default function ResolutionBoard() {
   const [selectedMatter, setSelectedMatter] = useState<Matter | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mattersState, setMattersState] = useState<Matter[]>(mockMatters);
+  const [actedIndices, setActedIndices] = useState<Set<number>>(new Set());
 
   // Future: replace mattersState with API data
   const matters = mattersState;
@@ -46,6 +48,7 @@ export default function ResolutionBoard() {
   const openMatter = useCallback((m: Matter) => {
     setSelectedMatter(m);
     setDrawerOpen(true);
+    setActedIndices(new Set());
   }, []);
 
   const openMatterById = useCallback((id: string) => {
@@ -53,10 +56,17 @@ export default function ResolutionBoard() {
     if (m) openMatter(m);
   }, [matters, openMatter]);
 
-  const handleUpdateMatter = useCallback((updated: Matter) => {
+  const handleCommitmentAction = useCallback((action: CommitmentAction) => {
+    if (!selectedMatter) return;
+    const updated = applyCommitmentAction(selectedMatter, action);
     setMattersState(prev => prev.map(m => m.id === updated.id ? updated : m));
     setSelectedMatter(updated);
-  }, []);
+    // Flash feedback
+    setActedIndices(prev => new Set(prev).add(action.commitmentIndex));
+    setTimeout(() => {
+      setActedIndices(prev => { const n = new Set(prev); n.delete(action.commitmentIndex); return n; });
+    }, 1200);
+  }, [selectedMatter]);
 
   return (
     <div className="p-6 space-y-5 max-w-[1440px]">
@@ -309,6 +319,7 @@ export default function ResolutionBoard() {
           {selectedMatter && (() => {
             const mom = momentumConfig[selectedMatter.momentum];
             const sentence = attentionSentence(selectedMatter);
+            const lastActivity = lastMeaningfulActivity(selectedMatter);
             return (
               <div>
                 {/* Drawer Header */}
@@ -322,9 +333,6 @@ export default function ResolutionBoard() {
                     <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-bold tracking-wider", mom.color, mom.bg)}>
                       {mom.label}
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Last activity {selectedMatter.lastActivityRelative}
-                    </span>
                   </div>
                   <p className={cn("text-xs font-medium mt-3", urgencyColor[sentence.urgency])}>
                     {sentence.text}
@@ -332,6 +340,26 @@ export default function ResolutionBoard() {
                 </div>
 
                 <div className="divide-y divide-border">
+                  {/* Next Interaction */}
+                  <div className="px-6 py-3">
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Next interaction</h4>
+                    {selectedMatter.nextInteraction ? (
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="h-3.5 w-3.5 text-[hsl(var(--primary))] shrink-0" />
+                        <span className="text-xs text-foreground font-medium">{selectedMatter.nextInteraction.title}</span>
+                        <span className="text-[10px] text-muted-foreground">— {selectedMatter.nextInteraction.time}</span>
+                      </div>
+                    ) : (
+                      <p className="text-[11px] text-muted-foreground italic">No upcoming interaction scheduled</p>
+                    )}
+                  </div>
+
+                  {/* Last Meaningful Activity */}
+                  <div className="px-6 py-3">
+                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Last meaningful activity</h4>
+                    <p className="text-[11px] text-foreground leading-relaxed">{lastActivity}</p>
+                  </div>
+
                   {/* Participants */}
                   <div className="px-6 py-4">
                     <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Participants</h4>
@@ -365,7 +393,11 @@ export default function ResolutionBoard() {
                   </div>
 
                   {/* Commitments */}
-                  <DrawerCommitments matter={selectedMatter} onUpdateMatter={handleUpdateMatter} />
+                  <DrawerCommitments
+                    commitments={selectedMatter.commitments}
+                    onAction={handleCommitmentAction}
+                    actedIndices={actedIndices}
+                  />
 
                   {/* Signals */}
                   {selectedMatter.signals.length > 0 && (

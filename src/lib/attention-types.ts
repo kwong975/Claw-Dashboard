@@ -39,6 +39,24 @@ export interface Matter {
   signals: Signal[];
   hasMeetingToday: boolean;
   lastActivityRelative: string;
+  nextInteraction?: { title: string; time: string };
+}
+
+/* ── Commitment Action Types ───────────────────────────── */
+
+export type CommitmentActionType =
+  | "complete"
+  | "reopen"
+  | "reassign"
+  | "reschedule"
+  | "addNote"
+  | "escalate"
+  | "deescalate";
+
+export interface CommitmentAction {
+  type: CommitmentActionType;
+  commitmentIndex: number;
+  payload?: string; // new owner, new date, or note text
 }
 
 /* ── View-oriented Summary Types ───────────────────────── */
