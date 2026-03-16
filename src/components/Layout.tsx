@@ -11,6 +11,7 @@ const nav = [
   { label: "Schedule",   to: "/schedule",  icon: Clock },
   { label: "Timeline",   to: "/timeline",  icon: Activity },
   { label: "Watchtower", to: "/watchtower", icon: Eye },
+  { label: "Workbench", to: "/workbench",  icon: Wrench },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

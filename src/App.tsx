@@ -34,6 +34,7 @@ const App = () => (
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/timeline" element={<Timeline />} />
             <Route path="/watchtower" element={<Watchtower />} />
+            <Route path="/workbench" element={<Workbench />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

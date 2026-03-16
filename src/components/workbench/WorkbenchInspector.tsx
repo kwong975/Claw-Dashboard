@@ -157,11 +157,11 @@ function InteractionInspector({ matter, index, otherMatters, onAction }: {
 function CommitmentInspector({ matter, index, otherMatters, onAction }: {
   matter: Matter; index: number; otherMatters: Matter[]; onAction: (a: WorkbenchAction) => void;
 }) {
-  const c = matter.commitments[index];
-  if (!c) return null;
-
   const [newOwner, setNewOwner] = useState("");
   const [newDate, setNewDate] = useState("");
+
+  const c = matter.commitments[index];
+  if (!c) return null;
 
   return (
     <div className="space-y-4">
