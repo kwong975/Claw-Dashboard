@@ -109,9 +109,7 @@ export default function Workbench() {
                 />
               )}
               {viewMode === "timeline" && (
-                <div className="flex flex-1 items-center justify-center h-full">
-                  <p className="text-[12px] text-muted-foreground">Timeline view — coming soon</p>
-                </div>
+                <WorkbenchTimelineView matter={selectedMatter} />
               )}
               {viewMode === "replay" && (
                 <WorkbenchReplayView
