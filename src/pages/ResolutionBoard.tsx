@@ -53,6 +53,12 @@ export default function ResolutionBoard() {
     if (m) openMatter(m);
   }, [matters, openMatter]);
 
+  const handleUpdateMatter = useCallback((updated: Matter) => {
+    setMattersState(prev => prev.map(m => m.id === updated.id ? updated : m));
+    setSelectedMatter(updated);
+  }, []);
+  }, [matters, openMatter]);
+
   return (
     <div className="p-6 space-y-5 max-w-[1440px]">
       {/* ── Header ──────────────────────────────────────── */}
