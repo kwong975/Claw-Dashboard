@@ -15,10 +15,10 @@ export const mockMatters: Matter[] = [
       { title: "Re: Audit timeline update", type: "email", date: "Mar 13", relative: "3 days ago" },
     ],
     commitments: [
-      { owner: "Raymond", title: "Submit updated policy draft", status: "overdue", due: "Mar 10" },
-      { owner: "Chris Liu", title: "Review audit findings", status: "overdue", due: "Mar 08" },
-      { owner: "Sarah", title: "Legal sign-off", status: "open", due: "Mar 18" },
-      { owner: "Raymond", title: "Notify compliance board", status: "open", due: "Mar 20" },
+      { owner: "Raymond", title: "Submit updated policy draft", status: "overdue", due: "Mar 10", origin: { label: "Compliance Standup", type: "meeting" } },
+      { owner: "Chris Liu", title: "Review audit findings", status: "overdue", due: "Mar 08", origin: { label: "Audit Prep Call", type: "meeting" } },
+      { owner: "Sarah", title: "Legal sign-off", status: "open", due: "Mar 18", origin: { label: "Audit timeline update", type: "email" } },
+      { owner: "Raymond", title: "Notify compliance board", status: "open", due: "Mar 20", origin: { label: "SMT Breakfast", type: "meeting" } },
     ],
     signals: [
       { description: "Regulatory deadline moved up by 1 week", source: "Email from legal", timestamp: "2h ago" },
