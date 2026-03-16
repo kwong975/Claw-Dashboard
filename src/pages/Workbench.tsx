@@ -14,6 +14,7 @@ import { MatterStructureView } from "@/components/workbench/MatterStructureView"
 import { WorkbenchInspector } from "@/components/workbench/WorkbenchInspector";
 import { WorkbenchSuggestions } from "@/components/workbench/WorkbenchSuggestions";
 import { WorkbenchReplayView } from "@/components/workbench/WorkbenchReplayView";
+import { WorkbenchTimelineView } from "@/components/workbench/WorkbenchTimelineView";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -108,9 +109,7 @@ export default function Workbench() {
                 />
               )}
               {viewMode === "timeline" && (
-                <div className="flex flex-1 items-center justify-center h-full">
-                  <p className="text-[12px] text-muted-foreground">Timeline view — coming soon</p>
-                </div>
+                <WorkbenchTimelineView matter={selectedMatter} />
               )}
               {viewMode === "replay" && (
                 <WorkbenchReplayView
