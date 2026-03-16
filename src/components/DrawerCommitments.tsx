@@ -1,28 +1,21 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
-  Check, UserRoundPen, CalendarClock, StickyNote, AlertTriangle,
-  MoreHorizontal, X, Send,
+  UserRoundPen, CalendarClock, StickyNote, AlertTriangle, Send,
 } from "lucide-react";
 import { CheckCircle2 } from "lucide-react";
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import type { Commitment, Matter } from "@/lib/attention-types";
+import type { Commitment, CommitmentAction } from "@/lib/attention-types";
 
 /* ── Types ─────────────────────────────────────────────── */
 
-interface CommitmentActionsProps {
-  matter: Matter;
-  onUpdateMatter: (updated: Matter) => void;
-}
-
-/* ── Helper: update a single commitment in a matter ───── */
-
-function updateCommitment(matter: Matter, idx: number, patch: Partial<Commitment>): Matter {
-  const updated = [...matter.commitments];
-  updated[idx] = { ...updated[idx], ...patch };
-  return { ...matter, commitments: updated };
+interface DrawerCommitmentsProps {
+  commitments: Commitment[];
+  onAction: (action: CommitmentAction) => void;
+  /** Set of indices that were recently acted on, for flash feedback */
+  actedIndices?: Set<number>;
 }
 
 /* ── Reassign Menu ────────────────────────────────────── */
@@ -130,21 +123,9 @@ function NotePopover({ current, onSave }: { current?: string; onSave: (note: str
 
 /* ── Main Commitments Section ─────────────────────────── */
 
-export function DrawerCommitments({ matter, onUpdateMatter }: CommitmentActionsProps) {
-  const [recentlyActed, setRecentlyActed] = useState<Set<number>>(new Set());
-
-  const flash = useCallback((idx: number) => {
-    setRecentlyActed(prev => new Set(prev).add(idx));
-    setTimeout(() => setRecentlyActed(prev => { const n = new Set(prev); n.delete(idx); return n; }), 1200);
-  }, []);
-
-  const act = useCallback((idx: number, patch: Partial<Commitment>) => {
-    onUpdateMatter(updateCommitment(matter, idx, patch));
-    flash(idx);
-  }, [matter, onUpdateMatter, flash]);
-
-  const overdueN = matter.commitments.filter(c => c.status === "overdue").length;
-  const openN = matter.commitments.filter(c => c.status !== "done").length;
+export function DrawerCommitments({ commitments, onAction, actedIndices }: DrawerCommitmentsProps) {
+  const overdueN = commitments.filter(c => c.status === "overdue").length;
+  const openN = commitments.filter(c => c.status !== "done").length;
 
   return (
     <div className="px-6 py-4">
@@ -158,21 +139,27 @@ export function DrawerCommitments({ matter, onUpdateMatter }: CommitmentActionsP
         </span>
       </h4>
       <div className="space-y-1.5">
-        {matter.commitments.map((c, idx) => {
-          const acted = recentlyActed.has(idx);
+        {commitments.map((c, idx) => {
+          const acted = actedIndices?.has(idx) ?? false;
+          const justDone = acted && c.status === "done";
+
           return (
             <div
               key={idx}
               className={cn(
-                "group/row relative flex items-start gap-3 rounded-md px-3 py-2 transition-all",
+                "group/row relative flex items-start gap-3 rounded-md px-3 py-2 transition-all duration-300",
                 c.status === "done" ? "bg-[hsl(var(--surface-1))] opacity-60" : "bg-[hsl(var(--surface-1))]",
                 c.escalated && c.status !== "done" && "ring-1 ring-[hsl(var(--warning)/0.3)]",
-                acted && "ring-1 ring-[hsl(var(--primary)/0.4)]",
+                justDone && "ring-1 ring-[hsl(var(--success)/0.5)]",
+                acted && !justDone && c.status !== "done" && "ring-1 ring-[hsl(var(--primary)/0.4)]",
               )}
             >
               {/* Status icon — click to toggle done */}
               <button
-                onClick={() => act(idx, { status: c.status === "done" ? "open" : "done" })}
+                onClick={() => onAction({
+                  type: c.status === "done" ? "reopen" : "complete",
+                  commitmentIndex: idx,
+                })}
                 className="mt-0.5 shrink-0"
                 title={c.status === "done" ? "Reopen" : "Mark done"}
               >
@@ -191,7 +178,7 @@ export function DrawerCommitments({ matter, onUpdateMatter }: CommitmentActionsP
                     {c.title}
                   </p>
                   {c.escalated && c.status !== "done" && (
-                    <span className="flex items-center gap-0.5 rounded bg-[hsl(var(--warning)/0.1)] px-1 py-px text-[9px] font-semibold text-[hsl(var(--warning))]">
+                    <span className="flex items-center gap-0.5 rounded bg-[hsl(var(--warning)/0.15)] px-1 py-px text-[9px] font-bold text-[hsl(var(--warning))]">
                       <AlertTriangle className="h-2 w-2" />
                       ESC
                     </span>
@@ -216,11 +203,23 @@ export function DrawerCommitments({ matter, onUpdateMatter }: CommitmentActionsP
               {/* Hover actions */}
               {c.status !== "done" && (
                 <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                  <ReassignPopover current={c.owner} onSelect={(name) => act(idx, { owner: name })} />
-                  <DueDatePopover current={c.due} onSelect={(date) => act(idx, { due: date, status: c.status === "overdue" ? "open" : c.status })} />
-                  <NotePopover current={c.note} onSave={(note) => act(idx, { note: note || undefined })} />
+                  <ReassignPopover
+                    current={c.owner}
+                    onSelect={(name) => onAction({ type: "reassign", commitmentIndex: idx, payload: name })}
+                  />
+                  <DueDatePopover
+                    current={c.due}
+                    onSelect={(date) => onAction({ type: "reschedule", commitmentIndex: idx, payload: date })}
+                  />
+                  <NotePopover
+                    current={c.note}
+                    onSave={(note) => onAction({ type: "addNote", commitmentIndex: idx, payload: note })}
+                  />
                   <button
-                    onClick={() => act(idx, { escalated: !c.escalated })}
+                    onClick={() => onAction({
+                      type: c.escalated ? "deescalate" : "escalate",
+                      commitmentIndex: idx,
+                    })}
                     className={cn(
                       "p-1 rounded hover:bg-[hsl(var(--surface-2))] transition-colors",
                       c.escalated ? "text-[hsl(var(--warning))]" : "text-muted-foreground hover:text-foreground"
