@@ -202,17 +202,18 @@ export function DrawerCommitments({ commitments, onAction, actedIndices }: Drawe
                     <span className="ml-1 text-[hsl(var(--critical))] font-medium">overdue</span>
                   )}
                 </p>
+                {c.origin && (
+                  <p className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground opacity-70">
+                    {(() => { const OIcon = originIcon(c.origin.type); return <OIcon className="h-2.5 w-2.5 shrink-0" />; })()}
+                    <span>from {c.origin.label}</span>
+                  </p>
+                )}
                 {c.note && (
                   <p className="mt-1 text-[10px] text-muted-foreground italic leading-snug">
                     "{c.note}"
                   </p>
                 )}
               </div>
-
-              {/* Hover actions */}
-              {c.status !== "done" && (
-                <div className="shrink-0 flex items-center gap-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity">
-                  <ReassignPopover
                     current={c.owner}
                     onSelect={(name) => onAction({ type: "reassign", commitmentIndex: idx, payload: name })}
                   />
