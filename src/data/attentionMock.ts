@@ -57,8 +57,8 @@ export const mockMatters: Matter[] = [
       { title: "Re: Document checklist", type: "email", date: "Mar 13", relative: "3 days ago" },
     ],
     commitments: [
-      { owner: "Audit Team", title: "Complete document review", status: "open", due: "Mar 17" },
-      { owner: "Raymond", title: "Sign audit readiness form", status: "open", due: "Mar 15" },
+      { owner: "Audit Team", title: "Complete document review", status: "open", due: "Mar 17", origin: { label: "Audit Prep Call", type: "meeting" } },
+      { owner: "Raymond", title: "Sign audit readiness form", status: "open", due: "Mar 15", origin: { label: "Document checklist", type: "email" } },
     ],
     signals: [
       { description: "Audit date confirmed for Mar 22", source: "External Auditors", timestamp: "3d ago" },
