@@ -111,8 +111,8 @@ export const mockMatters: Matter[] = [
       { title: "Hiring sync", type: "meeting", date: "Mar 12", relative: "4 days ago" },
     ],
     commitments: [
-      { owner: "HR", title: "Schedule remaining interviews", status: "open", due: "Mar 19" },
-      { owner: "Engineering Lead", title: "Review candidate shortlist", status: "open", due: "Mar 16" },
+      { owner: "HR", title: "Schedule remaining interviews", status: "open", due: "Mar 19", origin: { label: "Hiring sync", type: "meeting" } },
+      { owner: "Engineering Lead", title: "Review candidate shortlist", status: "open", due: "Mar 16", origin: { label: "Hiring sync", type: "meeting" } },
     ],
     signals: [],
   },
