@@ -366,43 +366,7 @@ export default function ResolutionBoard() {
                   </div>
 
                   {/* Commitments */}
-                  <div className="px-6 py-4">
-                    <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-                      Commitments
-                      <span className="ml-2 font-normal normal-case tracking-normal text-muted-foreground">
-                        {openCount(selectedMatter)} open
-                        {overdueCount(selectedMatter) > 0 && (
-                          <span className="text-[hsl(var(--critical))]"> · {overdueCount(selectedMatter)} overdue</span>
-                        )}
-                      </span>
-                    </h4>
-                    <div className="space-y-1.5">
-                      {selectedMatter.commitments.map((c, idx) => (
-                        <div key={idx} className={cn(
-                          "flex items-center gap-3 rounded-md px-3 py-2",
-                          c.status === "done" ? "bg-[hsl(var(--surface-1))] opacity-60" : "bg-[hsl(var(--surface-1))]"
-                        )}>
-                          <CheckCircle2 className={cn(
-                            "h-3.5 w-3.5 shrink-0",
-                            c.status === "done" ? "text-[hsl(var(--success))]" :
-                            c.status === "overdue" ? "text-[hsl(var(--critical))]" :
-                            "text-muted-foreground"
-                          )} />
-                          <div className="min-w-0 flex-1">
-                            <p className={cn("text-xs", c.status === "done" ? "text-muted-foreground line-through" : "text-foreground")}>
-                              {c.title}
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              {c.owner} · due {c.due}
-                              {c.status === "overdue" && (
-                                <span className="ml-1 text-[hsl(var(--critical))] font-medium">overdue</span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  <DrawerCommitments matter={selectedMatter} onUpdateMatter={handleUpdateMatter} />
 
                   {/* Signals */}
                   {selectedMatter.signals.length > 0 && (
