@@ -8,6 +8,7 @@ export const mockMatters: Matter[] = [
     momentum: "active",
     hasMeetingToday: true,
     lastActivityRelative: "2h ago",
+    nextInteraction: { title: "SMT Breakfast", time: "today at 08:30" },
     interactions: [
       { title: "SMT Breakfast", type: "meeting", date: "Mar 16", relative: "today" },
       { title: "Compliance Standup", type: "meeting", date: "Mar 14", relative: "2 days ago" },
