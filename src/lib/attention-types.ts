@@ -12,6 +12,8 @@ export interface Commitment {
   title: string;
   status: CommitmentStatus;
   due: string;
+  escalated?: boolean;
+  note?: string;
 }
 
 export interface Interaction {
