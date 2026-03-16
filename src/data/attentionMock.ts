@@ -127,7 +127,7 @@ export const mockMatters: Matter[] = [
       { title: "Playbook review session", type: "meeting", date: "Mar 10", relative: "6 days ago" },
     ],
     commitments: [
-      { owner: "CS Team", title: "Draft playbook v2", status: "open", due: "Mar 20" },
+      { owner: "CS Team", title: "Draft playbook v2", status: "open", due: "Mar 20", origin: { label: "Playbook review session", type: "meeting" } },
     ],
     signals: [],
   },
